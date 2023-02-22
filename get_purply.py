@@ -106,7 +106,8 @@ def download_multiple_days(sensor_index, start_date, end_date, out_path, sleep_t
         data = get_hist_purple_data(sensor_index, starttime, endtime)
         
         ## Save output data JSON to CSV
-        save_output(data, sensor_index, starttime, out_path)
+        if len(data.json()['data']) != 0:
+            save_output(data, sensor_index, starttime, out_path)
         
         time.sleep(sleep_time)
         
@@ -114,12 +115,6 @@ def download_multiple_days(sensor_index, start_date, end_date, out_path, sleep_t
         
 
 if __name__ == '__main__':
-#
-#    a = get_current_purple_data('156301')
-#    print(a.json())
-    # data = get_hist_purple_data('156193', starttime, endtime) ## ECA 2
-    # data = get_hist_purple_data('144020', starttime, endtime) ## 4th st
-#    data = get_hist_purple_data('156089', starttime, endtime) ## ECA 1
     
-    out_path = r'/Users/shaunhowe/Documents/research/eckington_aq/data/purple_air/4_st'
-    download_multiple_days('144020', '2022-12-28', '2023-02-01', out_path, sleep_time=180) ## ECA 1
+    out_path = r'/path/to/output/files'
+    download_multiple_days(sensor_id, '2022-11-01', '2022-12-01', out_path, sleep_time=210)
