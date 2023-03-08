@@ -88,7 +88,7 @@ class CorrectPurpleAir():
         self.filter_data = self.filter_data.dropna(subset=['pm2.5_filt_a', 'pm2.5_filt_b', 'humidity'])
 
         
-    def calculate_mean(self):
+    def calculate_mean(self, time_var, completeness=None):
         ''' Average A and B channels and perform Hourly and Daily averaging
         '''
         
@@ -103,11 +103,28 @@ class CorrectPurpleAir():
 
         print('Calculating PM2.5 daily and hourly mean')
         
-        ## Hourly and Daily averaging
-        self.avg_data_hour_utc = self.filter_data.resample('H', on='datetime_utc').mean()
-        self.avg_data_hour_et = self.filter_data.resample('H', on='datetime_et').mean()
-        self.avg_data_day_utc = self.filter_data.resample('d', on='datetime_utc').mean()
-        self.avg_data_day_et = self.filter_data.resample('d', on='datetime_et').mean()
+        ## Create Hourly and Daily average
+        self.avg_data_hour = self.filter_data.resample('H', on=time_var).mean()
+        self.avg_data_day = self.filter_data.resample('d', on=time_var).mean()
+        
+        ## Filter data based on completeness from time resampling
+        if completeness != None:
+            data_avail_hour = self.filter_data.resample('H', on=time_var).count()/30
+            data_avail_day = self.filter_data.resample('d', on=time_var).mean()/720
+        
+            ## Create time resampling completeness mask
+            mask_hour = data_avail_hour >= completeness
+            mask_day = data_avail_day >= completeness
+
+            ## Apply time resampling completeness mask
+            self.avg_data_hour = self.avg_data_hour[mask_hour]
+            self.avg_data_day = self.avg_data_day[mask_day]
+            
+            ## Filter out masked data
+            self.avg_data_hour = self.avg_data_hour.dropna(subset=['pm2.5_ab_avg', 'humidity'])
+            self.avg_data_day = self.avg_data_day.dropna(subset=['pm2.5_ab_avg', 'humidity'])
+            
+
         
     def apply_correction_model(self, data_dict):
         ''' Correct PM2.5 counts from Barkjohn et al 2021 model
@@ -129,6 +146,7 @@ if __name__ == '__main__':
     
     import os
     import glob
+    
 
     in_path = r'/path/to/csv/files'
     
@@ -139,9 +157,8 @@ if __name__ == '__main__':
     
     pa.load_data()
     pa.remove_pm25_outliers()
-    pa.calculate_mean()
-    pa.apply_correction_model(pa.avg_data_hour_et)
-    pa.apply_correction_model(pa.avg_data_day_et)
-    pa.apply_correction_model(pa.avg_data_hour_utc)
-    pa.apply_correction_model(pa.avg_data_day_utc)
+    pa.calculate_mean('datetime_et', completeness=.9)
+    pa.apply_correction_model(pa.avg_data_hour)
+    pa.apply_correction_model(pa.avg_data_day)
+
     
