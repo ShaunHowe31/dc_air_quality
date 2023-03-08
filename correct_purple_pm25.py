@@ -105,12 +105,13 @@ class CorrectPurpleAir():
         
         ## Create Hourly and Daily average
         self.avg_data_hour = self.filter_data.resample('H', on=time_var).mean()
-        self.avg_data_day = self.filter_data.resample('d', on=time_var).mean()
+        self.avg_data_day = self.filter_data.resample('D', on=time_var).mean()
+    
         
         ## Filter data based on completeness from time resampling
         if completeness != None:
             data_avail_hour = self.filter_data.resample('H', on=time_var).count()/30
-            data_avail_day = self.filter_data.resample('d', on=time_var).mean()/720
+            data_avail_day = self.filter_data.resample('D', on=time_var).count()/720
         
             ## Create time resampling completeness mask
             mask_hour = data_avail_hour >= completeness
@@ -124,7 +125,6 @@ class CorrectPurpleAir():
             self.avg_data_hour = self.avg_data_hour.dropna(subset=['pm2.5_ab_avg', 'humidity'])
             self.avg_data_day = self.avg_data_day.dropna(subset=['pm2.5_ab_avg', 'humidity'])
             
-
         
     def apply_correction_model(self, data_dict):
         ''' Correct PM2.5 counts from Barkjohn et al 2021 model
