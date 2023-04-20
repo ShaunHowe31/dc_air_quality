@@ -12,10 +12,8 @@ import datetime
 import json
 import pandas as pd
 
-## Here we store our API read key in a string variable that we can reference later.
-my_api_read_key = 'FB884F56-1702-11ED-8561-42010A800005'
 
-def get_hist_purple_data(sensor_index, starttime, endtime, average_period=0):
+def get_hist_purple_data(my_api_read_key, sensor_index, starttime, endtime, average_period=0):
     ''' Function for pulling historical purple air data through PurpleAir API
     '''
     
@@ -52,7 +50,7 @@ def get_hist_purple_data(sensor_index, starttime, endtime, average_period=0):
     ## Return the response 
     return r
 
-def get_current_purple_data(sensor_index):
+def get_current_purple_data(my_api_read_key, sensor_index):
     ''' Pull current data from PurpleAir sensors
     '''
     my_url = f'https://api.purpleair.com/v1/sensors/{sensor_index}'
@@ -117,4 +115,4 @@ def download_multiple_days(sensor_index, start_date, end_date, out_path, sleep_t
 if __name__ == '__main__':
     
     out_path = r'/path/to/output/files'
-    download_multiple_days(sensor_id, '2022-11-01', '2022-12-01', out_path, sleep_time=210)
+    download_multiple_days(my_api_read_key, sensor_id, '2022-11-01', '2022-12-01', out_path, sleep_time=210)
