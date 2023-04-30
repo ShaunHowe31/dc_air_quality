@@ -86,7 +86,7 @@ def save_output(data, sensor_index, data_date, out_path):
     purple_df.to_csv(file_path, index=False)
     
 
-def download_multiple_days(sensor_index, start_date, end_date, out_path, sleep_time=600):
+def download_multiple_days(api_read_key, sensor_index, start_date, end_date, out_path, sleep_time=600):
     ''' Function to loop through multiple days to download PurpleAir data
     '''
     
@@ -101,7 +101,7 @@ def download_multiple_days(sensor_index, start_date, end_date, out_path, sleep_t
         print(f'Getting data for {starttime} to {endtime}')
         
         ## Get data through API
-        data = get_hist_purple_data(sensor_index, starttime, endtime)
+        data = get_hist_purple_data(api_read_key, sensor_index, starttime, endtime)
         
         ## Save output data JSON to CSV
         if len(data.json()['data']) != 0:
