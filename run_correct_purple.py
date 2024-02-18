@@ -81,8 +81,8 @@ def save_hour_csv(purple_data, out_hour_fn):
 def save_day_csv(purple_data, out_day_fn):
     ''' Function to save out daily PM2.5 data
     '''
-    
-    in_df = pd.read_csv(out_day_fn)
+    if os.path.exists(out_day_fn) == True:
+        in_df = pd.read_csv(out_day_fn)
     
     purple_data.avg_data_day = purple_data.avg_data_day.reset_index()
 
@@ -94,16 +94,25 @@ def save_day_csv(purple_data, out_day_fn):
     purple_data.avg_data_day.drop(columns=[f'datetime_{tz}'])
     purple_data.avg_data_day[f'datetime_{tz}'] = date_day_str
 
-    ## Combine old and new dataframes
-    new_day_df = in_df.append(purple_data.avg_data_day)
+    ## Append to daily averaged file if the file exists
+    if os.path.exists(out_day_fn) == True:
+        in_df = pd.read_csv(out_day_fn)
+    
+        ## Combine old and new dataframes
+        new_day_df = in_df.append(purple_data.avg_data_day)
 
-    ## write daily acerages out to CSV
-    new_day_df.to_csv(out_day_fn, index=False, date_format='%Y-%m-%d %H:%M:%S')
+        ## write daily acerages out to CSV
+        new_day_df.to_csv(out_day_fn, index=False, date_format='%Y-%m-%d %H:%M:%S')
+    
+    ## Create new file if the daily average file doesn't exist
+    else:
+        ## write daily acerages out to CSV
+        purple_data.avg_data_day.to_csv(out_day_fn, index=False, date_format='%Y-%m-%d %H:%M:%S')
 
 
 if __name__ == '__main__':
     
-    sensor = 'ECA_3'
+    sensor = 'V_st'
     folder = 'corrected_data_robust'
     tz = 'utc' #utc or et
     
@@ -123,10 +132,9 @@ if __name__ == '__main__':
     
 
     #### Read in hourly input files
-    input_files = get_files(in_path, '2023-04-01', '2023-06-01')
+    input_files = get_files(in_path, '2023-07-01', '2024-02-17')
     
-
-
+    
     #### Function to correct PurpleAir data
     purple_air_dat = run_purple_air_correction(input_files)
     
@@ -135,9 +143,6 @@ if __name__ == '__main__':
     save_hour_csv(purple_air_dat, out_hour_fn)
     
     
-    
-    #### Function to save our daily data
+    #### Function to save out daily data
     save_day_csv(purple_air_dat, out_day_fn)
-
-
 
