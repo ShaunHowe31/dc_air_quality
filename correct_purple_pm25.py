@@ -12,7 +12,7 @@ from datetime import datetime
 
 
 class CorrectPurpleAir():
-    '''
+    ''' Class for correcting PurpleAir data using the Barkjohn (EPA) correction method
     '''
     def __init__(self, fn):
         self.filenames = fn
