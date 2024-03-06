@@ -53,7 +53,7 @@ def get_files(in_path, start_date, end_date):
     return files_between
     
     
-def run_purple_air_correction(input_files):
+def run_purple_air_correction(input_files, tz):
     ''' Function to run PurpleAir PM2.6 corrections
     '''
     
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     
     
     #### Function to correct PurpleAir data
-    purple_air_dat = run_purple_air_correction(input_files)
+    purple_air_dat = run_purple_air_correction(input_files, tz)
     
     
     #### Function to save out hourly data

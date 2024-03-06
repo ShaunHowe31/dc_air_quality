@@ -161,7 +161,7 @@ class AnalyzeColocation():
         self.purple_pm   = self.doee_purple_df['pm25_ab_corrected'].to_list()
     
 
-    def get_linear_model(self, plot=True):
+    def get_linear_model(self, plot=False, title=None):
         ''' Function for finding the linear model between the DOEE and PurpleAir PM2.5 data
                 the function can also create a scatter plot with regression data
         '''    
@@ -171,16 +171,16 @@ class AnalyzeColocation():
         self.r_squared = round(self.rval**2,3)
 
         ## Plot correlation scatter
-        if plot == True:
+        if plot == True and title != None:
             
             fig, ax = plt.subplots(1,figsize=(6.5,6.5))
 
             ax.scatter(self.doee_pm, self.purple_pm,marker='o',color='purple', edgecolor='k')
             ax.plot(np.unique(self.doee_pm), np.poly1d(np.polyfit(self.doee_pm, self.purple_pm, 1))(np.unique(self.doee_pm)), color='black')
             ax.grid()
-            plt.title('Corrected PurpleAir vs DOEE PM2.5 Sensor',fontsize=16.)
-            ax.set_xlabel('DC DOEE PM2.5',fontsize=14.)
-            ax.set_ylabel('Corrected PurpleAir PM2.5',fontsize=14.)
+            plt.title(title, fontsize=16.)
+            ax.set_xlabel('DC DOEE PM2.5 (µg/m³)',fontsize=14.)
+            ax.set_ylabel('EPA Corrected PurpleAir PM2.5 (µg/m³)',fontsize=14.)
             ax.annotate('$R^2$: '+str(round(self.r_squared,2)), xy=(20, 250), fontsize=14)
             ax.annotate('y = '+str(round(self.slope,2))+'x + '+str(round(self.inter,2)), xy=(20, 265), fontsize=14.)
 
