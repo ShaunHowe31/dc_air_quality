@@ -63,8 +63,26 @@ def run_purple_air_correction(input_files, tz):
     pa.load_data()
     pa.remove_pm25_outliers()
     pa.calculate_mean(f'datetime_{tz}', completeness=complete)
-    pa.apply_correction_model(pa.avg_data_hour)
-    pa.apply_correction_model(pa.avg_data_day)
+    pa.apply_epa_correction_model(pa.avg_data_hour)
+    pa.apply_epa_correction_model(pa.avg_data_day)
+    
+    return pa
+
+
+def run_doee_correction(pa, in_csv, sensor_id):
+    '''
+    '''
+    
+    ## Read in correction factors
+    correction_df = pd.read_csv(in_csv)
+    subset_df     = correction_df[correction_df['sensor_id']==sensor_id]
+    
+    slope         = subset_df['slope'].to_list()[0]
+    intercept     = subset_df['intercept'].to_list()[0]
+
+    ## Apply DOEE correction
+    pa.apply_doee_correction_model(pa.avg_data_hour, intercept, slope)
+    pa.apply_doee_correction_model(pa.avg_data_day, intercept, slope)
     
     return pa
 
@@ -113,35 +131,38 @@ def save_day_csv(purple_data, out_day_fn):
 if __name__ == '__main__':
     
     sensor = 'V_st'
-    folder = 'corrected_data_robust'
-    tz = 'utc' #utc or et
+    folder = 'epa_doee_correction'
+    tz = 'et' #utc or et
     
     sensor_id = get_sensor_info(sensor)
 
 
     #### Set folder and completeness threshold
-    if folder == 'corrected_data_robust':
+    if folder == 'corrected_data_robust' or folder == 'epa_doee_correction':
         complete = 0.9
     else:
         complete = None
      
-    base_path = r'/path/to/data'
+    base_path = /path/to/data
     in_path = rf'{base_path}/{sensor}/raw_data'
     out_hour_fn = rf'{base_path}/{sensor}/{folder}/hour_{tz}'
     out_day_fn = rf'{base_path}/{sensor}/{folder}/{sensor_id}_daily_mean_{tz}.csv'
     
+    correction_fn = r'/path/to/correction/file'
+    
 
     #### Read in hourly input files
-    input_files = get_files(in_path, '2023-07-01', '2024-02-17')
+    input_files = get_files(in_path, '2023-04-15', '2024-02-29')
     
     
-    #### Function to correct PurpleAir data
+    #### Function to correct PurpleAir data using epa correction
     purple_air_dat = run_purple_air_correction(input_files, tz)
     
+    #### Function to read in DC DOEE correction factors and apply to data
+    purple_air_dat = run_doee_correction(purple_air_dat, correction_fn, sensor)
     
     #### Function to save out hourly data
     save_hour_csv(purple_air_dat, out_hour_fn)
-    
     
     #### Function to save out daily data
     save_day_csv(purple_air_dat, out_day_fn)

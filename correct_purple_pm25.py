@@ -126,11 +126,11 @@ class CorrectPurpleAir():
             self.avg_data_day = self.avg_data_day.dropna(subset=['pm2.5_ab_avg', 'humidity'])
             
         
-    def apply_correction_model(self, data_dict):
+    def apply_epa_correction_model(self, data_dict):
         ''' Correct PM2.5 counts from Barkjohn et al 2021 model
         '''
         
-        print('Calculating corrected PM2.5 values')
+        print('Calculating EPA corrected PM2.5 values')
         
         pm25_ab = data_dict['pm2.5_ab_avg'].to_numpy()
         rh = data_dict['humidity'].to_numpy()
@@ -139,7 +139,16 @@ class CorrectPurpleAir():
         pm25_corrected = 0.524*pm25_ab-0.0862*rh+5.75
         
         ## Add corrected PM2.5 data back into data dictionary
-        data_dict['pm2.5_ab_corrected'] = pm25_corrected
+        data_dict['pm2.5_ab_epa_corr'] = pm25_corrected
+        
+    def apply_doee_correction_model(self, data_dict, intercept, slope):
+        ''' Apply second correction from DOEE colocation analysis
+        '''
+        
+        print('Calculating DOEE corrected PM2.5 values')
+        
+        pm_data = data_dict['pm2.5_ab_epa_corr'].to_list()
+        data_dict['pm2.5_ab_epa_doee_corr'] = (np.asarray(pm_data)-intercept)/slope
         
 
 if __name__ == '__main__':
